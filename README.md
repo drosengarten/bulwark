@@ -67,6 +67,33 @@ on the functions you're already writing:
     return result_df
 ```
 
+The checks can also be performed on an item in a returned tuple with a dataframe as 
+one of the values:
+```python
+    import bulwark.decorators as dc
+
+    @dc.IsShape((-1, 10))
+    @dc.IsMonotonic(df=0,strict=True)
+    @dc.HasNoNans(df=0) # the number specifies the tuple of the returned list/tuple
+    @dc.HasNoNans(df=1)
+    def compute(df):
+        # complex operations to determine result
+        ...
+    return (result_df1, result_df2)
+```
+The checks can also be applied to input parameters as well:
+```python
+    import bulwark.decorators as dc
+
+    @dc.IsShape(df='df_input',shape=(-1, 10))
+    @dc.IsMonotonic(df='df_input',strict=True)
+    @dc.HasNoNans(df='df_input') # the name specifies the name of the parameter
+    def compute(df_input):
+        # complex operations to determine result
+        ...
+    return result_df
+```
+
 Still want to have more robust test files?
 Bulwark's got you covered there, too, with importable functions.
 
