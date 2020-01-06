@@ -77,134 +77,6 @@ def test_has_no_x():
     tm.assert_frame_equal(result, df + 2)
 
 
-class TestFlexibleDecorator:
-    
-    df_pass = pd.DataFrame( [1] )
-    df_fail = pd.DataFrame( [0] )
-    
-    def test_return_single_df_none(self):
-        
-        @dc.HasNoX( df=None, values=[0] )
-        def _func( x ):
-            return x
-        
-        assert _func( self.df_pass ) is self.df_pass    
-        with pytest.raises( AssertionError ):
-            _func( self.df_fail )
-        
-        with pytest.raises( AttributeError ):
-            _func( pd.Series([1]) )
-    
-    def test_return_single_df_default(self):
-        
-        @dc.HasNoX( values=[0] )
-        def _func( x ):
-            return x
-        
-        assert _func( self.df_pass ) is self.df_pass    
-        with pytest.raises( AssertionError ):
-            _func( self.df_fail )
-        
-        with pytest.raises( AttributeError ):
-            _func( pd.Series([1]) )
-    
-    def test_required_dataframe_arg(self):
-    
-        @dc.HasNoX( df='df0', values=[0] )
-        def _func( df0 ):
-            return df0
-    
-        assert _func( self.df_pass ) is self.df_pass
-        assert _func( df0=self.df_pass ) is self.df_pass
-    
-        with pytest.raises( AssertionError ):
-            _func( self.df_fail )
-        with pytest.raises( AssertionError ):
-            _func( df0=self.df_fail )
-        
-        with pytest.raises( TypeError ):
-            _func()
-        
-        assert _func( None ) is None
-        assert _func( df0=None) is None
-        
-        with pytest.raises( AttributeError ):
-            _func( df0=pd.Series([1]) )
-    
-    def test_optional_dataframe_arg(self):
-        
-        @dc.HasNoX( df='df_opt', values=[0] )
-        def _func( x, df_opt=None ):
-            return df_opt
-        
-        assert _func( 99 ) is None
-        assert _func( x=99 ) is None
-        assert _func( 99, None ) is None
-        assert _func( 99, df_opt=None ) is None
-        assert _func( df_opt=None, x=99 ) is None
-        
-        assert _func( 99, self.df_pass ) is self.df_pass
-        assert _func( 99, df_opt=self.df_pass ) is self.df_pass
-        assert _func( df_opt=self.df_pass, x=99 ) is self.df_pass
-        
-        with pytest.raises( AssertionError ):
-            _func( 99, self.df_fail )
-        with pytest.raises( AssertionError ):
-            _func( 99, df_opt=self.df_fail )
-        with pytest.raises( AssertionError ):
-            _func( df_opt=self.df_fail, x=99 )
-        
-        with pytest.raises( AttributeError ):
-            _func( 99, df_opt='hello world' )
-        
-    def test_optional_dataframe_wrong_name(self):
-        with pytest.raises( NameError ):
-            @dc.HasNoX( df='df0', values=[0] )
-            def _func( x, df1=None ):
-                return df1
-    
-    def test_optional_dataframe_wrong_type(self):
-
-        @dc.HasNoX( df='df_opt', values=[0] )
-        def _func( x, df_opt=1 ):
-            return df_opt
-        
-        with pytest.raises( AttributeError ):
-            _func( 99 )
-        
-        assert _func( 99, None ) is None
-        assert _func( 99, self.df_pass ) is self.df_pass
-        
-        with pytest.raises( AssertionError ):
-            _func( 99, self.df_fail )
-
-    def test_func_returns_tuple(self):
-        
-        @dc.HasNoX(df=1, values=[0])
-        def _func(x):
-            return x
-        
-        x = ( 99, self.df_pass )
-        assert _func( x ) is x
-        with pytest.raises( AssertionError ):
-            _func( (99, self.df_fail) )
-        
-        with pytest.raises( IndexError ):
-            _func( (self.df_pass, ) )
-            
-        x = [ 99, self.df_pass ]
-        with pytest.raises( TypeError ):
-            _func( x )
-        
-        x = pd.Series( [None, self.df_pass], index=[1,0] )
-        with pytest.raises( TypeError ):
-            _func( x )
-        
-    def test_df_is_not_int(self):
-        with pytest.raises( TypeError ):
-            dc.HasNoX( df=1.0, values=[0] )
-
-    
 def test_has_no_nans():
     df = pd.DataFrame(np.random.randn(5, 3))
     result = ck.has_no_nans(df)
@@ -650,24 +522,151 @@ def test_custom_check():
         return df
 
     df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+    df2 = pd.DataFrame({"a": [7, np.nan, 9], "b": [10, 11, 12]})
 
-
-    tm.assert_frame_equal(df, ck.custom_check(f, df=df, length=2))
-    tm.assert_frame_equal(df, ck.custom_check(f, df, 2))
+    tm.assert_frame_equal(df, ck.custom_check(df, f, length=2))
+    tm.assert_frame_equal(df, ck.custom_check(df, f, 2))
 
     # order is verify_func, verif_kwargs, decorated_func
     tm.assert_frame_equal(df, dc.CustomCheck(f, length=2)(_noop)(df))
     tm.assert_frame_equal(df, dc.CustomCheck(f, 2)(_noop)(df))
 
+    @dc.CustomCheck(f, 10, enabled=False)
+    def append_a_df(df, df2):
+        return df.append(df2, ignore_index=True)
 
-
-
-
-
-
+    result = append_a_df(df, df2)
+    tm.assert_frame_equal(df.append(df2, ignore_index=True), result)
 
     with pytest.raises(AssertionError):
-        ck.custom_check(f, df=df, length=4)
+        ck.custom_check(df, f, length=4)
 
     with pytest.raises(AssertionError):
         dc.CustomCheck(f, 4)(_noop)(df)
+
+class TestFlexibleDecorator:
+    
+    df_pass = pd.DataFrame( [1] )
+    df_fail = pd.DataFrame( [0] )
+    
+    def test_return_single_df_none(self):
+        
+        @dc.HasNoX( df=None, values=[0] )
+        def _func( x ):
+            return x
+        
+        assert _func( self.df_pass ) is self.df_pass    
+        with pytest.raises( AssertionError ):
+            _func( self.df_fail )
+        
+        with pytest.raises( AttributeError ):
+            _func( pd.Series([1]) )
+    
+    def test_return_single_df_default(self):
+        
+        @dc.HasNoX( values=[0] )
+        def _func( x ):
+            return x
+        
+        assert _func( self.df_pass ) is self.df_pass    
+        with pytest.raises( AssertionError ):
+            _func( self.df_fail )
+        
+        with pytest.raises( AttributeError ):
+            _func( pd.Series([1]) )
+    
+    def test_required_dataframe_arg(self):
+    
+        @dc.HasNoX( df='df0', values=[0] )
+        def _func( df0 ):
+            return df0
+    
+        assert _func( self.df_pass ) is self.df_pass
+        assert _func( df0=self.df_pass ) is self.df_pass
+    
+        with pytest.raises( AssertionError ):
+            _func( self.df_fail )
+        with pytest.raises( AssertionError ):
+            _func( df0=self.df_fail )
+        
+        with pytest.raises( TypeError ):
+            _func()
+        
+        assert _func( None ) is None
+        assert _func( df0=None) is None
+        
+        with pytest.raises( AttributeError ):
+            _func( df0=pd.Series([1]) )
+    
+    def test_optional_dataframe_arg(self):
+        
+        @dc.HasNoX( df='df_opt', values=[0] )
+        def _func( x, df_opt=None ):
+            return df_opt
+        
+        assert _func( 99 ) is None
+        assert _func( x=99 ) is None
+        assert _func( 99, None ) is None
+        assert _func( 99, df_opt=None ) is None
+        assert _func( df_opt=None, x=99 ) is None
+        
+        assert _func( 99, self.df_pass ) is self.df_pass
+        assert _func( 99, df_opt=self.df_pass ) is self.df_pass
+        assert _func( df_opt=self.df_pass, x=99 ) is self.df_pass
+        
+        with pytest.raises( AssertionError ):
+            _func( 99, self.df_fail )
+        with pytest.raises( AssertionError ):
+            _func( 99, df_opt=self.df_fail )
+        with pytest.raises( AssertionError ):
+            _func( df_opt=self.df_fail, x=99 )
+        
+        with pytest.raises( AttributeError ):
+            _func( 99, df_opt='hello world' )
+        
+    def test_optional_dataframe_wrong_name(self):
+        with pytest.raises( NameError ):
+            @dc.HasNoX( df='df0', values=[0] )
+            def _func( x, df1=None ):
+                return df1
+    
+    def test_optional_dataframe_wrong_type(self):
+
+        @dc.HasNoX( df='df_opt', values=[0] )
+        def _func( x, df_opt=1 ):
+            return df_opt
+        
+        with pytest.raises( AttributeError ):
+            _func( 99 )
+        
+        assert _func( 99, None ) is None
+        assert _func( 99, self.df_pass ) is self.df_pass
+        
+        with pytest.raises( AssertionError ):
+            _func( 99, self.df_fail )
+
+    def test_func_returns_tuple(self):
+        
+        @dc.HasNoX(df=1, values=[0])
+        def _func(x):
+            return x
+        
+        x = ( 99, self.df_pass )
+        assert _func( x ) is x
+        with pytest.raises( AssertionError ):
+            _func( (99, self.df_fail) )
+        
+        with pytest.raises( IndexError ):
+            _func( (self.df_pass, ) )
+            
+        x = [ 99, self.df_pass ]
+        with pytest.raises( TypeError ):
+            _func( x )
+        
+        x = pd.Series( [None, self.df_pass], index=[1,0] )
+        with pytest.raises( TypeError ):
+            _func( x )
+        
+    def test_df_is_not_int(self):
+        with pytest.raises( TypeError ):
+            dc.HasNoX( df=1.0, values=[0] )
