@@ -23,7 +23,8 @@ class BaseDecorator(object):
                    "Only allowed types are:\n"
                    " str:  arg name of the input argument to the decorated function to check\n"
                    " int:  the entry in a tuple returned by the decorated function to check\n"
-                   " None: check the single dataframe return by the decorated function".format(type(self._df))
+                   " None: check the single dataframe return by"
+                   " the decorated function".format(type(self._df))
                    )
             raise TypeError(msg)
 
@@ -55,7 +56,8 @@ class BaseDecorator(object):
             if type(self._df) is int:
                 res = f(*args, **kwargs)
                 if type(res) is not tuple:
-                    raise TypeError('Your function needs to return a tuple to use df=<int> in this decorator')
+                    raise TypeError('Your function needs to return'
+                                    'a tuple to use df=<int> in this decorator')
                 check_kwargs['df'] = res[self._df]
                 self.check_func(**check_kwargs)
                 return res
