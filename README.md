@@ -1,6 +1,6 @@
 Bulwark's Documentation
 ========================================
-<a href="https://pypi.org/project/bulwark/"><img src="https://img.shields.io/pypi/dm/bulwark?style=for-the-badge" alt="downloads" /></a>  
+<a href="https://pypi.org/project/bulwark/"><img src="https://img.shields.io/pypi/dm/bulwark?style=for-the-badge" alt="downloads" /></a>
 
 <a href="https://pypi.org/project/bulwark/"><img src="https://img.shields.io/pypi/v/bulwark?style=for-the-badge" alt="latest release" /></a>
 <a href="https://pypi.org/project/bulwark/"><img src="https://img.shields.io/pypi/pyversions/bulwark?style=for-the-badge" alt="supported python versions" /></a>
@@ -63,11 +63,11 @@ on the functions you're already writing:
     @dc.HasNoNans()
     def compute(df):
         # complex operations to determine result
-        ...
+
     return result_df
 ```
 
-The checks can also be performed on an item in a returned tuple with a dataframe as 
+The checks can also be performed on an item in a returned tuple with a dataframe as
 one of the values:
 ```python
     import bulwark.decorators as dc
@@ -78,7 +78,7 @@ one of the values:
     @dc.HasNoNans(df=1)
     def compute(df):
         # complex operations to determine result
-        ...
+
     return (result_df1, result_df2)
 ```
 The checks can also be applied to input parameters as well:
@@ -90,7 +90,7 @@ The checks can also be applied to input parameters as well:
     @dc.HasNoNans(df='df_input') # the name specifies the name of the parameter
     def compute(df_input):
         # complex operations to determine result
-        ...
+
     return result_df
 ```
 
@@ -110,7 +110,7 @@ Nope - just toggle the built-in "enabled" flag available for every decorator.
     @dc.IsShape((3, 2), enabled=False)
     def compute(df):
         # complex operations to determine result
-        ...
+
     return result_df
 ```
 
@@ -174,5 +174,5 @@ We work hard to make contributing as easy as possible,
 and previous open source experience is not required!
 Please see [contributing.md](docs/contributing.md) for how to get started.
 
-Thank you to all our past contributors, especially these folks:  
+Thank you to all our past contributors, especially these folks:
 [![](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/images/0)](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/links/0)[![](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/images/1)](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/links/1)[![](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/images/2)](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/links/2)[![](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/images/3)](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/links/3)[![](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/images/4)](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/links/4)[![](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/images/5)](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/links/5)[![](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/images/6)](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/links/6)[![](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/images/7)](https://sourcerer.io/fame/ZaxR/ZaxR/bulwark/links/7)

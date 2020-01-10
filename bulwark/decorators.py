@@ -1,7 +1,8 @@
 """Generates decorators for each check in `checks.py`."""
 import functools
 import sys
-from inspect import Parameter, getfullargspec, getmembers, isfunction, signature
+from inspect import (Parameter, getfullargspec, getmembers, isfunction,
+                     signature)
 
 import bulwark.checks as ck
 from bulwark.generic import snake_to_camel
