@@ -509,7 +509,7 @@ def test_multi_check():
 
     with pytest.raises(AssertionError):
         result = dc.MultiCheck(checks={ck.has_no_nans: {"columns": None},
-                               total_sum_not_equal: {"amt": 51}},
+                                       total_sum_not_equal: {"amt": 51}},
                                warn=False)(_noop)(df)
 
     # with pytest.raises(AssertionError):
